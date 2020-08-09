@@ -4,12 +4,43 @@ services:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
+
   kafka:
     build: .
     ports:
       - "9092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+      # PLEASE UPDATE THE HOST IP IF NEEDED
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.0.2
+      KAFKA_CREATE_TOPICS: "data-input:3:1"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  # Access ZooNavigator web ui at: YOUR-IP:9001
+  zoonavigator:
+    image: elkozmon/zoonavigator
+    ports:
+      - 9001:9000
+    environment:
+      HTTP_PORT: 9000
+
+  # Access KafkaManager web ui at: YOUR-IP:9000
+  kafkamanager:
+    image: kafkamanager/kafka-manager
+    ports:
+      - 9000:9000
+    environment:
+      # PLEASE UPDATE THE HOST IP IF NEEDED
+      ZK_HOSTS: 192.168.0.2
+
+# ! In KafkaManager Web: If you try to create a local cluster that will fail because of some mutex issue.
+# ! Original Error: Yikes! KeeperErrorCode = Unimplemented for /Kafka-Manager/mutex Try Again
+# ! Run this following commands inside the zookeeper container to fix it:
+#
+# docker exec -it kafka-docker_zookeeper_1 bash
+# ./bin/zkCli.sh
+# ls /kafka-manager
+# create /kafka-manager/mutex ""
+# create /kafka-manager/mutex/locks ""
+# create /kafka-manager/mutex/leases ""

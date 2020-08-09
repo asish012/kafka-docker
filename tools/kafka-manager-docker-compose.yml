@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  # https://github.com/yahoo/CMAK (https://github.com/yahoo/kafka-manager)
+  kafka-manager:
+    image: qnib/plain-kafka-manager
+    network_mode: host
+    environment:
+      ZOOKEEPER_HOSTS: "192.168.0.2:2181"
+      APPLICATION_SECRET: please_change_me
+    restart: always
